@@ -4,66 +4,82 @@ Quick view of current implementation state.
 
 ---
 
-## Current Status: **READY FOR V2 IMPLEMENTATION**
+## Current Status: **V3 IMPLEMENTATION COMPLETE**
 
-Plan: `thoughts/shared/plans/game-ai-v2.md`
-Previous implementation: `versions/v1-initial/`
+Plan: `thoughts/shared/plans/game-ai-v3.md`
 
-## Phase Progress (V2 Plan)
+## Phase Progress (V3 Plan)
 
 | Step | Status | Tests | Notes |
 |------|--------|-------|-------|
-| Pre-Step: Context Prefetch | Complete | - | Docs cached in reference/ |
-| Step 0: Project Setup | Complete | 2/2 | npm, TypeScript, Vitest, ora, inquirer |
-| Step 1: CLI Foundation | Complete | 2/2 | create, doctor, learn commands |
-| Step 2: Create Command | Complete | 13/13 | Interactive project creation |
-| Step 3: Game Templates | Complete | 13/13 | third-person only (others skipped) |
-| Step 4: Doctor Command | In Progress | - | Environment diagnostics |
-| Step 5: Claude Helpers | Complete | - | Done in Step 3 (base template) |
-| Step 6: Template Utilities | Complete | - | Done in Step 2 |
-| Step 7: Learn Command | Not Started | - | Interactive tutorials (optional) |
+| Step 1: Project Setup | Complete | - | package.json, tsconfig.json, dependencies |
+| Step 2: CLI Entry Point | Complete | - | src/index.ts with commander |
+| Step 3: Create Command | Complete | 4/4 | Copy template, inject app key |
+| Step 4: Install MCP Command | Complete | - | Clone MCP server, configure Claude |
+| Step 5: Install Helpers Command | Complete | - | Copy .claude/ directory |
+| Step 6: Claude Helpers Content | Complete | - | CLAUDE.md + 5 commands |
+| Step 7: Doctor Command | Complete | 7/7 | Diagnose setup issues |
 
 ## Test Coverage
 
 ```
-Total Tests: 0
-Passing: 0
+Total Tests: 16
+Passing: 16
 Failing: 0
 Coverage: N/A
 ```
 
-## V2 Key Changes from V1
+## V3 Key Changes from V2
 
-- `create` command (interactive) replaces `init`
-- Working game templates with C# scripts
-- Normcore App Key prompted during setup
-- Beginner-focused Claude helpers (`/add-pickup`, `/fix`, `/explain`)
-- `doctor` command for troubleshooting
-- `learn` command for tutorials
+- Uses existing `template/` Unity project (Unity 6 + Normcore 3.0.1)
+- App key injection into `NormcoreAppSettings.asset` (YAML format)
+- Simplified architecture - copy template rather than generate
+- Parameterized Claude commands (`$ARGUMENTS`)
 
-## Mandatory Per-Step Checklist
+## Files Created
 
-After each step:
-- [ ] Run code-reviewer agent on new files
-- [ ] Add entry to session-log.md
-- [ ] Add entry to decision-log.md (if choices made)
-- [ ] Update this progress.md
-- [ ] Run tests + type check
+```
+src/
+├── index.ts              # CLI entry point
+├── commands/
+│   ├── create.ts         # Create Unity project
+│   ├── install-mcp.ts    # Install MCP server
+│   ├── install-helpers.ts # Install .claude/ helpers
+│   └── doctor.ts         # Diagnose issues
+├── utils/
+│   ├── template.ts       # Copy template
+│   └── normcore.ts       # Inject app key
+└── __tests__/
+    └── utils/
+        ├── template.test.ts
+        └── normcore.test.ts
 
-## Recent Activity
+helpers/
+├── CLAUDE.md             # System prompt
+└── commands/
+    ├── add-player.md
+    ├── add-pickup.md
+    ├── add-enemy.md
+    ├── fix.md
+    └── explain.md
+```
 
-| Time | Action | Result |
-|------|--------|--------|
-| - | V1 moved to versions/ | Ready for V2 |
+## Verification
 
-## Blockers
+- [x] `npm test` - 11 tests passing
+- [x] `npx tsc --noEmit` - No type errors
+- [x] `npm run build` - Compiles to dist/
+- [x] `node dist/index.js --help` - CLI works
 
-None.
+## Next Steps
 
-## Next Action
-
-Begin Pre-Step: Context Prefetch
+Manual testing required:
+- [ ] `game-ai create test-game` - Creates Unity project
+- [ ] `game-ai install-mcp` - Sets up MCP server
+- [ ] `game-ai install-helpers` - Copies .claude/ directory
+- [ ] `game-ai doctor` - Reports status correctly
+- [ ] Open project in Unity - no errors
 
 ---
 
-_Last updated: Ready for V2_
+_Last updated: V3 Implementation Complete_

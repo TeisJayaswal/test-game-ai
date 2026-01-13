@@ -31,11 +31,11 @@ $ npx @normal/game-ai install-helpers
 → Adds .claude/ folder with commands, prompts, subagents
 
 # Now in Claude Code:
-> /add-player      → Claude creates a player character with movement
-> /add-pickup      → Claude creates objects players can grab
-> /add-enemy       → Claude creates enemies or NPCs
-> /fix             → Claude helps diagnose and fix problems
-> /explain         → Claude explains Unity/Normcore concepts simply
+> /add-player flying hoverboard character → Claude creates what you describe
+> /add-pickup health potion               → Claude creates pickup based on description
+> /add-enemy zombie that chases players   → Claude creates enemy with described behavior
+> /fix player clips through walls         → Claude fixes the specific problem
+> /explain what is a prefab               → Claude explains the concept simply
 ```
 
 ---
@@ -77,6 +77,10 @@ $ npx @normal/game-ai install-helpers
 | App Key File | `Assets/Normal/Resources/NormcoreAppSettings.asset` |
 | Default Scene | `Assets/Normal/Examples/Hoverbird Player/Realtime + Hoverbird Player.unity` |
 
+### Normcore
+- **Documentation:** https://normcore.io/documentation
+- **Dashboard (signup/app keys):** https://dashboard.normcore.io
+- **Package Registry:** https://normcore.io/registry
 ---
 
 ## Implementation Steps
@@ -391,11 +395,11 @@ export async function installHelpers(): Promise<void> {
     spinner.succeed(chalk.green('Claude helpers installed!'));
 
     console.log(chalk.blue('\nAvailable commands in Claude Code:'));
-    console.log(chalk.gray('  /add-player   - Create a player character'));
-    console.log(chalk.gray('  /add-pickup   - Create objects players can grab'));
-    console.log(chalk.gray('  /add-enemy    - Create enemies or NPCs'));
-    console.log(chalk.gray('  /fix          - Get help fixing problems'));
-    console.log(chalk.gray('  /explain      - Learn Unity/Normcore concepts\n'));
+    console.log(chalk.gray('  /add-player [description]  - e.g., /add-player flying character'));
+    console.log(chalk.gray('  /add-pickup [description]  - e.g., /add-pickup health potion'));
+    console.log(chalk.gray('  /add-enemy [description]   - e.g., /add-enemy zombie'));
+    console.log(chalk.gray('  /fix [problem]             - e.g., /fix player falls through floor'));
+    console.log(chalk.gray('  /explain [concept]         - e.g., /explain what is a prefab\n'));
 
   } catch (error) {
     spinner.fail('Failed to install helpers');
@@ -490,36 +494,39 @@ Full docs: https://normcore.io/documentation
 ```markdown
 # /add-player
 
-Create a player character that can move around in the game.
+Create a player character based on the user's description.
+
+**User's request:** $ARGUMENTS
 
 ## What This Does
 
-Creates a complete player setup with:
-- A visible character (capsule by default)
-- Movement controls (WASD)
-- Multiplayer sync (other players see this player move)
-- Camera setup appropriate for the game type
+Creates a player character that matches what the user described. Default (if no description): a simple capsule with WASD movement.
+
+Examples:
+- `/add-player` → Basic capsule player with WASD
+- `/add-player flying character` → Player with flight controls
+- `/add-player knight with sword` → Medieval character with attack
+- `/add-player top-down shooter` → Top-down view with shooting
 
 ## Steps
 
-1. First, check what examples exist in `Assets/Normal/Examples/`
-2. If starting fresh, create a new Player prefab
-3. Add these components:
-   - CharacterController (for movement)
-   - RealtimeView (for multiplayer)
-   - RealtimeTransform (to sync position)
-   - PlayerController script (create if needed)
+1. Read the user's description above and understand what kind of player they want
+2. Check existing examples in `Assets/Normal/Examples/` for reference
+3. Create a new Player prefab matching their description:
+   - Visible character (capsule, or appropriate shape)
+   - Movement controls matching the game type (WASD, flight, etc.)
+   - Add RealtimeView (for multiplayer)
+   - Add RealtimeTransform (to sync position)
+   - Create appropriate PlayerController script
 4. Copy the prefab to Assets/Resources/ (required for runtime spawning)
 5. Make sure there's a PlayerSpawner in the scene
 
 ## Explain to User
 
-"I'm creating a player character for you. This includes:
-- A capsule shape you'll be able to see
-- Controls to move with WASD
-- Multiplayer sync so other players see you move
-
-After I'm done, press Play and try moving with WASD!"
+After creating, tell them:
+- What you created based on their description
+- How to control the player (WASD, space for jump, etc.)
+- How to test it (press Play!)
 ```
 
 **File: `helpers/commands/add-pickup.md`**
@@ -527,38 +534,38 @@ After I'm done, press Play and try moving with WASD!"
 ```markdown
 # /add-pickup
 
-Create an object that players can pick up and interact with.
+Create a pickup object based on the user's description.
+
+**User's request:** $ARGUMENTS
 
 ## What This Does
 
-Creates a pickup object with:
-- A visible shape (cube by default)
-- Detection for when player gets close
-- Pick up / drop functionality
-- Multiplayer sync (all players see who has it)
+Creates a pickup object that matches what the user described. Default: a glowing cube.
+
+Examples:
+- `/add-pickup` → Basic glowing cube pickup
+- `/add-pickup health potion` → Health restore item
+- `/add-pickup coin worth 10 points` → Collectible with score
+- `/add-pickup weapon sword` → Weapon the player can use
 
 ## Steps
 
-1. Create new GameObject with desired shape
-2. Add components:
+1. Read the user's description above and understand what they want
+2. Create new GameObject with appropriate visuals (shape, color, effects)
+3. Add components:
    - Collider (set as Trigger)
    - RealtimeView
    - RealtimeTransform
-   - Pickup script (create)
-3. Create Pickup.cs with:
-   - OnTriggerEnter to detect player
-   - Ownership request on pickup
-   - Parent to player hand/position
-   - Drop on button press
-4. Save as prefab
+   - Custom Pickup script based on their description
+4. If it has special effects (healing, damage, score), implement that logic
+5. Save as prefab in Resources/ if it spawns at runtime
 
 ## Explain to User
 
-"I'm creating a pickup object. When your player walks up to it and presses E,
-you'll pick it up. Other players will see you holding it too!
-
-The object uses Normcore's ownership system - when you pick it up, you 'own' it,
-so your game controls where it goes."
+After creating, tell them:
+- What pickup you created based on their description
+- How to interact with it (walk into it, press E, etc.)
+- What effect it has (heals, adds score, equips weapon, etc.)
 ```
 
 **File: `helpers/commands/add-enemy.md`**
@@ -566,36 +573,39 @@ so your game controls where it goes."
 ```markdown
 # /add-enemy
 
-Create an enemy or NPC for the game.
+Create an enemy or NPC based on the user's description.
+
+**User's request:** $ARGUMENTS
 
 ## What This Does
 
-Creates an enemy with:
-- A visible character
-- Basic AI behavior (patrol, chase, etc.)
-- Health system
-- Multiplayer sync
+Creates an enemy that matches what the user described. Default: a red cube that chases players.
+
+Examples:
+- `/add-enemy` → Basic chasing enemy
+- `/add-enemy zombie that shambles slowly` → Slow zombie AI
+- `/add-enemy turret that shoots at players` → Stationary shooter
+- `/add-enemy friendly NPC shopkeeper` → Non-hostile NPC
 
 ## Steps
 
-1. Create enemy GameObject
-2. Add components:
-   - NavMeshAgent (for movement)
+1. Read the user's description above and understand the behavior they want
+2. Create enemy GameObject with appropriate visuals
+3. Add components:
+   - NavMeshAgent (for movement) - if it moves
    - RealtimeView
    - RealtimeTransform
-   - EnemyAI script
-   - Health script (synced via RealtimeComponent)
-3. Set up NavMesh in scene (if not already done)
-4. Configure patrol points or chase behavior
+   - Custom EnemyAI script matching their description
+   - Health script if it can be damaged
+4. Set up NavMesh in scene if not already done
+5. Configure behavior (patrol, chase, shoot, friendly, etc.)
 
 ## Explain to User
 
-"I'm creating an enemy for your game. It will:
-- Move around using Unity's navigation system
-- Chase players when they get close
-- Have health that syncs across all players
-
-One player's game will 'own' each enemy and control its AI. Other players see the same behavior."
+After creating, tell them:
+- What enemy/NPC you created based on their description
+- How it behaves (chases, patrols, stays still, etc.)
+- How to interact with it (attack it, talk to it, avoid it, etc.)
 ```
 
 **File: `helpers/commands/fix.md`**
@@ -603,47 +613,58 @@ One player's game will 'own' each enemy and control its AI. Other players see th
 ```markdown
 # /fix
 
-Help diagnose and fix problems with the game.
+Help diagnose and fix a specific problem the user describes.
 
-## When User Says This
+**User's problem:** $ARGUMENTS
 
-They're stuck on something. Be helpful and patient.
+## What This Does
 
-## Diagnostic Steps
+Helps fix the specific problem the user described. If no description, ask them what's wrong.
 
-1. **Ask what's happening** - "What did you expect vs what's actually happening?"
+Examples:
+- `/fix player clips through walls` → Fix collision issues
+- `/fix multiplayer not syncing` → Debug Normcore setup
+- `/fix error NullReferenceException` → Find the null reference
+- `/fix` (no args) → Ask what's happening
 
-2. **Check Console** - Look for red errors in Unity Console
-   - NullReferenceException → Something isn't connected in Inspector
-   - "Room not found" → Normcore connection issue
-   - Pink/magenta objects → Missing material/shader
+## Steps
 
-3. **Common Issues:**
+1. Read the user's problem description above
+2. If no description provided, ask: "What's happening? What did you expect vs what you see?"
+3. Investigate the specific issue:
+   - Use Unity MCP to check Console for errors
+   - Check relevant scripts and components
+   - Look at Inspector settings
 
-   **"Multiplayer doesn't work"**
-   - Is the Normcore App Key set? (Check NormcoreAppSettings asset)
-   - Are both players using the same room name?
-   - Does the prefab have RealtimeView?
+## Common Issues & Fixes
 
-   **"Player doesn't move"**
-   - Is the script on the player?
-   - Is isOwnedLocallyInHierarchy check correct?
-   - Is CharacterController present?
+**Collision issues (clips through, doesn't collide)**
+- Check Collider component exists
+- Check layer collision matrix
+- Check rigidbody settings
 
-   **"Other players don't see my movement"**
-   - Does player have RealtimeTransform?
-   - Is the prefab in Resources folder?
-   - Was it spawned with Realtime.Instantiate?
+**Multiplayer not syncing**
+- Is App Key set in NormcoreAppSettings?
+- Does object have RealtimeView?
+- Does object have RealtimeTransform?
+- Is prefab in Resources/ folder?
 
-   **"I see errors when I press Play"**
-   - Read the error message carefully
-   - Click the error to see which script/line
-   - Usually a missing reference in Inspector
+**NullReferenceException**
+- Click the error to find the line
+- Something in Inspector isn't connected
+- A GetComponent failed
 
-4. **If Still Stuck:**
-   - Ask user to describe exactly what they did
-   - Have them share the specific error message
-   - Walk through step by step
+**Player doesn't move**
+- Check movement script is attached
+- Check isOwnedLocallyInHierarchy (Normcore)
+- Check Input settings
+
+## Explain the Fix
+
+After fixing, always tell them:
+- What was wrong
+- What you changed to fix it
+- Why this happened (so they learn)
 ```
 
 **File: `helpers/commands/explain.md`**
@@ -653,41 +674,50 @@ They're stuck on something. Be helpful and patient.
 
 Explain a Unity or Normcore concept in simple terms.
 
+**User wants to understand:** $ARGUMENTS
+
+## What This Does
+
+Explains the concept the user asked about using simple language and analogies.
+
+Examples:
+- `/explain what is a prefab` → Explain prefabs with analogies
+- `/explain how does multiplayer work` → Explain Normcore sync
+- `/explain the code in PlayerController.cs` → Walk through the script
+- `/explain` (no args) → Ask what they want to learn about
+
 ## How to Explain
 
-Use analogies and simple language. Assume they know NOTHING.
+1. Read what the user wants to understand above
+2. Use simple language - assume they're new to game dev
+3. Use real-world analogies
+4. Give concrete examples from this project when possible
 
-## Common Concepts
+## Quick Reference (for common concepts)
 
-**GameObject**
-"Think of it like a LEGO brick. By itself it's just a thing in your world.
-You add components to give it abilities - like adding wheels makes it a car."
+**GameObject** - "A LEGO brick. By itself it's just a thing. You add components to give it abilities."
 
-**Component**
-"Components are abilities you give to a GameObject. Want it to move? Add a
-movement script. Want it to be solid? Add a Collider. They stack up."
+**Component** - "Abilities you add to a GameObject. Movement, physics, visuals - each is a component."
 
-**Prefab**
-"A prefab is like a template or blueprint. Make one player, save it as a prefab,
-now you can create copies. Change the prefab, all copies update too."
+**Prefab** - "A template. Make one player, save as prefab, now you can spawn copies."
 
-**Script**
-"A script is instructions written in C#. It tells the game what to do.
-'When player presses W, move forward.' You attach scripts to GameObjects."
+**Script** - "Instructions in C#. 'When player presses W, move forward.'"
 
-**RealtimeView (Normcore)**
-"This is how Normcore keeps track of things in multiplayer. Put it on anything
-that needs to be the 'same' for all players. It's like giving it a phone number
-so everyone can stay in sync."
+**RealtimeView** - "Normcore's tracking tag. Put on anything that needs to sync between players."
 
-**Ownership (Normcore)**
-"In multiplayer, only one player 'owns' each object at a time. The owner's game
-controls it, everyone else just sees the updates. Like how only the driver
-controls the car, passengers just ride along."
+**RealtimeTransform** - "Syncs position/rotation. Add to anything that moves in multiplayer."
 
-**Room (Normcore)**
-"A room is a multiplayer session. Players in the same room can see each other.
-Different room name = different game session. It's like a private Discord channel."
+**Ownership** - "Only one player controls each object. Owner moves it, others see the movement."
+
+**Room** - "A multiplayer session. Same room name = same game. Like a Discord channel."
+
+## For Code Explanations
+
+If they ask about specific code:
+1. Read the file they mention
+2. Break it down section by section
+3. Explain what each part does in plain English
+4. Point out the important parts they should understand
 ```
 
 ---
@@ -807,15 +837,3 @@ function checkClaudeHelpers() {
 | `helpers/subagents/*.md` | Subagent configs |
 
 ---
-
-## Already Done
-
-- [x] `template/` - Complete Unity project with Normcore 3.0.1
-- [x] App key cleared from template
-
-## Next Steps
-
-1. Create `helpers/` directory with all Claude helpers
-2. Set up `package.json` and `tsconfig.json`
-3. Implement CLI commands
-4. Test end-to-end

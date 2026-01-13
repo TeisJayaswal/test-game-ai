@@ -83,6 +83,59 @@ V1 implementation is in `versions/v1-initial/`. Key issues encountered:
 
 ---
 
+### Entry #9: Parameterized Commands (Planning)
+**What happened:** User asked if commands like `/add-player` could accept user input. Claude Code custom commands support arguments via `$ARGUMENTS` placeholder.
+**Resolution:** Updated all 5 helper commands in v3 plan to accept natural language descriptions:
+- `/add-player flying hoverboard character`
+- `/add-pickup health potion worth 50 HP`
+- `/add-enemy zombie that chases players`
+- `/fix player clips through walls`
+- `/explain what is a prefab`
+**Learning:** Parameterized commands make helpers much more powerful and natural to use. Users can describe what they want in plain English rather than using preset templates.
+
+---
+
+## V3 Implementation
+
+### Session Start: 2026-01-12 (continued)
+
+### Entry #10: V3 Full Implementation (Steps 1-7)
+**What happened:** Implemented the complete game-ai v3 CLI from scratch. The existing `template/` directory already contained a working Unity 6 project with Normcore 3.0.1. Created:
+- `package.json` and `tsconfig.json` for npm package
+- `src/index.ts` - CLI entry point with commander
+- `src/commands/create.ts` - Interactive project creation with inquirer
+- `src/commands/install-mcp.ts` - Clone and configure Unity MCP server
+- `src/commands/install-helpers.ts` - Copy .claude/ directory
+- `src/commands/doctor.ts` - Diagnose setup issues
+- `src/utils/template.ts` - Copy Unity project template
+- `src/utils/normcore.ts` - Inject app key into NormcoreAppSettings.asset
+- `helpers/CLAUDE.md` - System prompt for beginner-friendly assistance
+- `helpers/commands/*.md` - Five parameterized commands (add-player, add-pickup, add-enemy, fix, explain)
+
+**Resolution:** All 11 tests pass. CLI builds and runs correctly. Type check clean.
+
+**Learning:**
+1. The `hasAppKey()` regex bug was caught by tests - the regex `\s*(\S+)` crossed newlines, matching content from the next line. Fixed by using `[ \t]*(\S+)` to stay on same line.
+2. Writing tests alongside implementation (TDD) is essential for catching subtle bugs.
+
+### Entry #11: Security Fixes (Code Review)
+**What happened:** Code-reviewer agent identified security issues:
+1. Command injection in install-mcp.ts using `execSync` with interpolated paths
+2. Path traversal in create.ts - no validation of project name (could use `../etc/...`)
+3. Unsafe JSON parsing without try/catch
+4. Missing APPDATA fallback on Windows
+
+**Resolution:**
+- Changed `execSync` to `spawnSync` with array arguments to prevent shell injection
+- Added `isValidProjectName()` that only allows `[a-zA-Z0-9_-]+`
+- Added try/catch around JSON.parse for Claude config
+- Added proper error for missing APPDATA on Windows
+- Improved app key validation (minimum 20 chars)
+
+**Learning:** Security review should be part of every implementation step. Using `spawnSync` with array args is safer than `execSync` with string interpolation.
+
+---
+
 ## Retrospective Notes
 
 _Patterns and learnings across entries_

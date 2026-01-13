@@ -1,0 +1,48 @@
+{
+  "name": "@normal/game-ai",
+  "version": "0.1.0",
+  "description": "AI-powered Unity game development with Normcore",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "game-ai": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "template",
+    "helpers"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "npx tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "unity",
+    "normcore",
+    "multiplayer",
+    "game-development",
+    "ai",
+    "claude"
+  ],
+  "author": "Normal",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "inquirer": "^9.3.7",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
