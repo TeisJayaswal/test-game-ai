@@ -1,0 +1,5 @@
+{
+  "name": "vr",
+  "description": "Set up VR player rig with proper locomotion",
+  "prompt": "Set up a VR player rig for this game. Please:\n\n1. Create XR Rig with camera and controllers\n2. Add locomotion (teleport and/or continuous movement)\n3. Add interaction system (grab, UI pointer, etc.)\n4. Make the rig multiplayer-ready with Normcore (RealtimeView, RealtimeAvatar)\n5. Add avatar representation for other players\n6. Test that VR input works\n\nUse Unity's XR Interaction Toolkit and Normcore's multiplayer components."
+}

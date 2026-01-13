@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(pwd:*)",
+      "Bash(which:*)",
+      "Bash(diff:*)",
+      "Bash(wc:*)",
+      "Bash(touch:*)",
+      "Bash(./scripts/*)",
+      "Bash(bash ./scripts/*)",
+      "Write(src/**)",
+      "Write(package.json)",
+      "Write(package-lock.json)",
+      "Write(tsconfig.json)",
+      "Write(vitest.config.ts)",
+      "Write(README.md)",
+      "Write(thoughts/**)",
+      "Write(scripts/**)",
+      "Edit(src/**)",
+      "Edit(package.json)",
+      "Edit(tsconfig.json)",
+      "Edit(vitest.config.ts)",
+      "Edit(README.md)",
+      "Edit(thoughts/**)",
+      "Edit(scripts/**)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/typecheck.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
