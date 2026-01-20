@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "unity-mcp": {
+      "command": "bash",
+      "args": ["/Users/teisjayaswal/Library/Application Support/CodeMaestro/UnityMcpRelay/launch.sh"]
+    },
+    "unity-mcp-extended": {
+      "command": "bash",
+      "args": ["/Users/teisjayaswal/Normcore/claude-game-template/unity-mcp-extended/python/launch.sh"]
+    }
+  }
+}
