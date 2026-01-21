@@ -143,9 +143,22 @@ Based on PRD Deliverable Timeline
 - **Problem**: Future enhancements after successful launch
 - **Tasks**:
   - Add Normcore support
-  - Create curl install script for non-npm users
   - Add "New version available" notification
   - Extend to other models (Gemini, Codex)
+  - Sign macOS binaries with Apple Developer certificate
+
+#### TICKET-9: Smart command updates for existing projects
+- **Owner**: TBD
+- **Priority**: Low (4)
+- **Status**: Backlog
+- **Problem**: Users with existing projects don't automatically get command/skill updates
+- **Context**: Once `gamekit init` copies `.claude/` to a project, those files are owned by the project. Updates to the template don't propagate. Users can run `gamekit install-commands` to refresh, but this overwrites customizations.
+- **Suggested improvements**:
+  - Add `gamekit update-commands` with smart merge (warn about conflicts)
+  - Store version in `.claude/.version`, check against latest on init
+  - Prompt users when commands are outdated: "Your commands are X versions behind, update?"
+  - Clear template cache when auto-updater installs new binary version
+- **Current behavior**: Manual `install-commands` overwrites everything (standard for scaffolding tools)
 
 ---
 
