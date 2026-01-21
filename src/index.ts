@@ -6,6 +6,10 @@ import { createUnity } from './commands/create-unity.js';
 import { installCommands } from './commands/install-commands.js';
 import { configureMcp } from './commands/configure-mcp.js';
 import { runDoctor } from './commands/doctor.js';
+import { maybeCheckForUpdates } from './utils/updater.js';
+
+// Check for updates in background (non-blocking)
+maybeCheckForUpdates();
 
 const program = new Command();
 
