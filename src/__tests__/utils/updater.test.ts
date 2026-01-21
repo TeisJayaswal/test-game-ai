@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   compareVersions,
-  getCurrentVersion
+  getCurrentVersion,
+  getBinaryName,
+  getInstallDir,
+  getConfigDir
 } from '../../utils/updater.js';
+import * as os from 'os';
+import * as path from 'path';
 
 describe('updater utilities', () => {
   describe('compareVersions', () => {
@@ -35,9 +40,50 @@ describe('updater utilities', () => {
       expect(version).toMatch(/^\d+\.\d+\.\d+$/);
     });
 
-    it('returns the version from package.json', () => {
+    it('returns the embedded version', () => {
       const version = getCurrentVersion();
-      expect(version).toBe('0.1.0'); // Current version
+      expect(version).toBe('0.1.0');
+    });
+  });
+
+  describe('getBinaryName', () => {
+    it('returns platform-specific binary name', () => {
+      const binaryName = getBinaryName();
+      // Should match pattern: gamekit-{platform}-{arch}
+      expect(binaryName).toMatch(/^gamekit-(darwin|linux|windows)-(arm64|x64)(\.exe)?$/);
+    });
+
+    it('includes .exe extension on Windows', () => {
+      const binaryName = getBinaryName();
+      if (process.platform === 'win32') {
+        expect(binaryName).toMatch(/\.exe$/);
+      } else {
+        expect(binaryName).not.toMatch(/\.exe$/);
+      }
+    });
+  });
+
+  describe('getInstallDir', () => {
+    it('returns a path containing .gamekit', () => {
+      const installDir = getInstallDir();
+      expect(installDir).toContain('.gamekit');
+      expect(installDir).toContain('bin');
+    });
+
+    it('uses home directory', () => {
+      const installDir = getInstallDir();
+      const home = os.homedir();
+      // On Unix, should be under home. On Windows, under LOCALAPPDATA
+      if (process.platform !== 'win32') {
+        expect(installDir.startsWith(home)).toBe(true);
+      }
+    });
+  });
+
+  describe('getConfigDir', () => {
+    it('returns path to .gamekit in home directory', () => {
+      const configDir = getConfigDir();
+      expect(configDir).toContain('.gamekit');
     });
   });
 });

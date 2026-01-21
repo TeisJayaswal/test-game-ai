@@ -10,19 +10,27 @@ AI-powered Unity game development with Claude. Describe your game, Claude builds
 
 2. **Claude Code**
    - Install: https://docs.anthropic.com/en/docs/claude-code
-   - (This also installs Node.js which gamekit needs)
 
 ## Installation
 
-```bash
-npm install -g gamekit-cli
-```
-
-Or run directly with npx:
+### macOS / Linux / WSL
 
 ```bash
-npx gamekit-cli init
+curl -fsSL https://raw.githubusercontent.com/TeisJayaswal/test-game-ai/main/install.sh | bash
 ```
+
+### Windows PowerShell
+
+```powershell
+irm https://raw.githubusercontent.com/TeisJayaswal/test-game-ai/main/install.ps1 | iex
+```
+
+The installer will:
+- Download the correct binary for your platform
+- Install to `~/.gamekit/bin` (Mac/Linux) or `%LOCALAPPDATA%\gamekit\bin` (Windows)
+- Add gamekit to your PATH
+
+gamekit automatically updates in the background to keep you on the latest version.
 
 ## Quick Start
 
@@ -187,9 +195,9 @@ This is normal before opening Unity. The relay installs when Unity opens and res
 
 ## Requirements
 
-- macOS or Windows
+- macOS (Apple Silicon or Intel), Linux, or Windows
 - Unity 2022.x or Unity 6 (6000.x)
-- Claude Code (includes Node.js)
+- Claude Code
 
 ## License
 

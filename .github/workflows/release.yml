@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun test
+
+      - name: Build all platforms
+        run: |
+          mkdir -p dist
+          bun build --compile --target=bun-darwin-arm64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-darwin-arm64
+          bun build --compile --target=bun-darwin-x64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-darwin-x64
+          bun build --compile --target=bun-linux-x64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-linux-x64
+          bun build --compile --target=bun-windows-x64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-windows-x64.exe
+
+      - name: Make install scripts executable
+        run: chmod +x install.sh
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/gamekit-darwin-arm64
+            dist/gamekit-darwin-x64
+            dist/gamekit-linux-x64
+            dist/gamekit-windows-x64.exe
+            install.sh
+            install.ps1
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

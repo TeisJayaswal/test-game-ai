@@ -3,12 +3,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import { fileURLToPath } from 'url';
+import * as os from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Package info
-const PACKAGE_NAME = 'gamekit-cli';
+// GitHub repo for releases
+const GITHUB_REPO = 'TeisJayaswal/test-game-ai';
+
+// Embedded version (set at build time or from package.json)
+const VERSION = '0.1.0';
 
 /**
  * Get the path to the gamekit config directory (~/.gamekit)
@@ -25,42 +29,93 @@ export function getConfigDir(): string {
 }
 
 /**
- * Get the current version from package.json
+ * Get the install directory for the binary
  */
-export function getCurrentVersion(): string {
-  try {
-    // Try to find package.json relative to this module
-    const pkgPath = path.resolve(__dirname, '..', '..', 'package.json');
-    if (fs.existsSync(pkgPath)) {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-      return pkg.version;
-    }
-  } catch {
-    // Ignore errors
+export function getInstallDir(): string {
+  if (process.platform === 'win32') {
+    return path.join(process.env.LOCALAPPDATA || '', 'gamekit', 'bin');
   }
-  return '0.0.0';
+  return path.join(os.homedir(), '.gamekit', 'bin');
 }
 
 /**
- * Fetch the latest version from npm registry
+ * Get the current version
  */
-export function fetchLatestVersion(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const url = `https://registry.npmjs.org/${PACKAGE_NAME}/latest`;
+export function getCurrentVersion(): string {
+  return VERSION;
+}
 
-    https.get(url, (res) => {
+/**
+ * Get the binary name for the current platform
+ */
+export function getBinaryName(): string {
+  const platform = process.platform === 'darwin' ? 'darwin' :
+                   process.platform === 'win32' ? 'windows' : 'linux';
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+  const ext = process.platform === 'win32' ? '.exe' : '';
+
+  return `gamekit-${platform}-${arch}${ext}`;
+}
+
+/**
+ * Fetch JSON from HTTPS URL
+ */
+function fetchJson(url: string): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const options = {
+      headers: {
+        'User-Agent': 'gamekit-updater'
+      }
+    };
+
+    https.get(url, options, (res) => {
+      // Handle redirects
+      if (res.statusCode === 301 || res.statusCode === 302) {
+        const redirectUrl = res.headers.location;
+        if (redirectUrl) {
+          fetchJson(redirectUrl).then(resolve).catch(reject);
+          return;
+        }
+      }
+
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
-          const json = JSON.parse(data);
-          resolve(json.version || '0.0.0');
+          resolve(JSON.parse(data));
         } catch {
-          reject(new Error('Failed to parse npm registry response'));
+          reject(new Error('Failed to parse JSON response'));
         }
       });
     }).on('error', reject);
   });
+}
+
+/**
+ * Fetch the latest version from GitHub releases
+ */
+export async function fetchLatestVersion(): Promise<string> {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+  const release = await fetchJson(url) as { tag_name?: string };
+
+  // Remove 'v' prefix if present (e.g., 'v0.1.0' -> '0.1.0')
+  const version = release.tag_name?.replace(/^v/, '') || '0.0.0';
+  return version;
+}
+
+/**
+ * Get download URL for the current platform from a release
+ */
+export async function getDownloadUrl(version: string): Promise<string | null> {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/releases/tags/v${version}`;
+  const release = await fetchJson(url) as {
+    assets?: Array<{ name: string; browser_download_url: string }>
+  };
+
+  const binaryName = getBinaryName();
+  const asset = release.assets?.find(a => a.name === binaryName);
+
+  return asset?.browser_download_url || null;
 }
 
 /**
@@ -99,17 +154,21 @@ export function logUpdate(message: string): void {
 export function checkForUpdatesInBackground(): void {
   const currentVersion = getCurrentVersion();
   const configDir = getConfigDir();
+  const installDir = getInstallDir();
+  const binaryName = getBinaryName();
 
   // Create the update script inline
   const updateScript = `
     const https = require('https');
-    const { execSync } = require('child_process');
     const fs = require('fs');
     const path = require('path');
+    const os = require('os');
 
-    const PACKAGE_NAME = '${PACKAGE_NAME}';
+    const GITHUB_REPO = '${GITHUB_REPO}';
     const currentVersion = '${currentVersion}';
     const configDir = '${configDir.replace(/\\/g, '\\\\')}';
+    const installDir = '${installDir.replace(/\\/g, '\\\\')}';
+    const binaryName = '${binaryName}';
     const logPath = path.join(configDir, 'update.log');
 
     function log(msg) {
@@ -117,19 +176,46 @@ export function checkForUpdatesInBackground(): void {
       fs.appendFileSync(logPath, '[' + timestamp + '] ' + msg + '\\n');
     }
 
-    function fetchLatestVersion() {
+    function fetchJson(url) {
       return new Promise((resolve, reject) => {
-        https.get('https://registry.npmjs.org/' + PACKAGE_NAME + '/latest', (res) => {
+        const options = {
+          headers: { 'User-Agent': 'gamekit-updater' }
+        };
+        https.get(url, options, (res) => {
+          if (res.statusCode === 301 || res.statusCode === 302) {
+            fetchJson(res.headers.location).then(resolve).catch(reject);
+            return;
+          }
           let data = '';
           res.on('data', chunk => data += chunk);
           res.on('end', () => {
-            try {
-              resolve(JSON.parse(data).version || '0.0.0');
-            } catch (e) {
-              reject(e);
-            }
+            try { resolve(JSON.parse(data)); }
+            catch (e) { reject(e); }
           });
         }).on('error', reject);
+      });
+    }
+
+    function downloadFile(url, dest) {
+      return new Promise((resolve, reject) => {
+        const options = {
+          headers: { 'User-Agent': 'gamekit-updater' }
+        };
+        https.get(url, options, (res) => {
+          if (res.statusCode === 301 || res.statusCode === 302) {
+            downloadFile(res.headers.location, dest).then(resolve).catch(reject);
+            return;
+          }
+          const file = fs.createWriteStream(dest);
+          res.pipe(file);
+          file.on('finish', () => {
+            file.close();
+            resolve();
+          });
+        }).on('error', (e) => {
+          fs.unlink(dest, () => {});
+          reject(e);
+        });
       });
     }
 
@@ -146,20 +232,50 @@ export function checkForUpdatesInBackground(): void {
     async function main() {
       try {
         log('Checking for updates... (current: ' + currentVersion + ')');
-        const latest = await fetchLatestVersion();
+
+        // Fetch latest release
+        const releaseUrl = 'https://api.github.com/repos/' + GITHUB_REPO + '/releases/latest';
+        const release = await fetchJson(releaseUrl);
+        const latest = (release.tag_name || '').replace(/^v/, '');
         log('Latest version: ' + latest);
 
         if (compareVersions(latest, currentVersion) > 0) {
           log('New version available! Updating...');
-          try {
-            execSync('npm install -g ${PACKAGE_NAME}@' + latest, {
-              stdio: 'ignore',
-              timeout: 60000 // 60 second timeout
-            });
-            log('Updated to version ' + latest + ' successfully!');
-          } catch (e) {
-            log('Update failed: ' + e.message);
+
+          // Find download URL for our binary
+          const asset = (release.assets || []).find(a => a.name === binaryName);
+          if (!asset) {
+            log('No binary found for ' + binaryName);
+            return;
           }
+
+          // Download to temp location
+          const tempPath = path.join(os.tmpdir(), 'gamekit-update-' + Date.now());
+          log('Downloading from ' + asset.browser_download_url);
+          await downloadFile(asset.browser_download_url, tempPath);
+
+          // Make executable (Unix)
+          if (process.platform !== 'win32') {
+            fs.chmodSync(tempPath, 0o755);
+          }
+
+          // Ensure install dir exists
+          if (!fs.existsSync(installDir)) {
+            fs.mkdirSync(installDir, { recursive: true });
+          }
+
+          // Move to install location
+          const targetPath = path.join(installDir, process.platform === 'win32' ? 'gamekit.exe' : 'gamekit');
+
+          // On Windows, rename old binary first (can't overwrite running exe)
+          if (process.platform === 'win32' && fs.existsSync(targetPath)) {
+            const oldPath = targetPath + '.old';
+            try { fs.unlinkSync(oldPath); } catch {}
+            fs.renameSync(targetPath, oldPath);
+          }
+
+          fs.renameSync(tempPath, targetPath);
+          log('Updated to version ' + latest + ' successfully!');
         } else {
           log('Already up to date.');
         }
@@ -175,7 +291,6 @@ export function checkForUpdatesInBackground(): void {
   const child = spawn(process.execPath, ['-e', updateScript], {
     detached: true,
     stdio: 'ignore',
-    // Use shell on Windows for better compatibility
     shell: process.platform === 'win32'
   });
 
@@ -185,7 +300,7 @@ export function checkForUpdatesInBackground(): void {
 
 /**
  * Check if we should run an update check
- * Limits checks to once per hour to avoid hammering npm registry
+ * Limits checks to once per hour to avoid hammering GitHub API
  */
 export function shouldCheckForUpdates(): boolean {
   const configDir = getConfigDir();
