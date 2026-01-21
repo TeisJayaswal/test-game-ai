@@ -10,7 +10,7 @@ import {
   openUnityProject,
   UnityInstall
 } from '../utils/unity.js';
-import { copyTemplate } from '../utils/template.js';
+import { copyTemplateAsync } from '../utils/template.js';
 import { generateMcpConfig } from '../utils/mcp.js';
 import { isWindows } from '../utils/platform.js';
 
@@ -100,7 +100,7 @@ export async function init(): Promise<void> {
   // Step 4: Copy template files
   spinner.start('Installing Claude commands, skills, and agents...');
   try {
-    copyTemplate(projectPath);
+    await copyTemplateAsync(projectPath);
 
     // Update manifest.json with correct MCP package URL for Unity version
     const manifestPath = path.join(projectPath, 'Packages', 'manifest.json');

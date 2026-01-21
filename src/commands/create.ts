@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
 import * as path from 'path';
-import { copyTemplate } from '../utils/template.js';
+import { copyTemplateAsync } from '../utils/template.js';
 import { injectAppKey } from '../utils/normcore.js';
 
 /**
@@ -57,7 +57,7 @@ export async function createProject(name: string): Promise<void> {
 
     // Copy template
     spinner.text = 'Copying Unity project...';
-    copyTemplate(projectPath);
+    await copyTemplateAsync(projectPath);
 
     // Inject app key
     spinner.text = 'Configuring Normcore...';
