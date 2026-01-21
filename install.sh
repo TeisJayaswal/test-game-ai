@@ -70,6 +70,9 @@ curl -sL "$DOWNLOAD_URL" -o "$INSTALL_DIR/$BINARY_NAME"
 # Make executable
 chmod +x "$INSTALL_DIR/$BINARY_NAME"
 
+# Remove macOS quarantine attribute (prevents "damaged" error for unsigned binaries)
+xattr -d com.apple.quarantine "$INSTALL_DIR/$BINARY_NAME" 2>/dev/null || true
+
 echo -e "${GREEN}Installed gamekit to $INSTALL_DIR/$BINARY_NAME${NC}"
 
 # Add to PATH instructions
