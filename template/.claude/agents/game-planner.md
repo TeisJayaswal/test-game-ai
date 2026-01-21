@@ -23,7 +23,7 @@ You create game design documents and implementation plans.
 
 ## Game Design Document Template
 
-Write to: `/Users/teisjayaswal/Desktop/my-game/GAME_DESIGN.md`
+Write to: `GAME_DESIGN.md` (in project root)
 
 ```markdown
 # [Game Title]

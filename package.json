@@ -1,16 +1,15 @@
 {
-  "name": "@normal/game-ai",
+  "name": "gamekit-cli",
   "version": "0.1.0",
-  "description": "AI-powered Unity game development with Normcore",
+  "description": "AI-powered Unity game development with Claude",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "game-ai": "./dist/index.js"
+    "gamekit": "./dist/index.js"
   },
   "files": [
     "dist",
-    "template",
-    "helpers"
+    "template"
   ],
   "scripts": {
     "build": "tsc",

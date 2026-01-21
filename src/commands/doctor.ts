@@ -1,70 +1,118 @@
 import chalk from 'chalk';
 import * as fs from 'fs';
+import { hasMcpConfig, mcpRelayExists } from '../utils/mcp.js';
+import { hasClaudeCommands } from '../utils/commands.js';
+import { findUnityInstalls } from '../utils/unity.js';
 
 interface CheckResult {
   name: string;
   passed: boolean;
-  fix: string;
+  message?: string;
+  fix?: string;
 }
 
 export async function runDoctor(): Promise<void> {
-  console.log(chalk.blue('\nDiagnosing game-ai setup...\n'));
+  console.log(chalk.blue('\n🔍 Diagnosing gamekit setup...\n'));
 
   const checks = [
+    checkUnityInstalled(),
     checkUnityProject(),
-    checkNormcoreConfig(),
-    checkClaudeHelpers(),
+    checkClaudeCommands(),
+    checkMcpConfig(),
+    checkMcpRelay(),
   ];
 
   let allPassed = true;
+  let hasWarnings = false;
+
   for (const check of checks) {
-    const icon = check.passed ? '\u2713' : '\u2717';
-    const color = check.passed ? chalk.green : chalk.red;
-    console.log(`${color(icon)} ${check.name}`);
-    if (!check.passed) {
-      console.log(chalk.gray(`  ${check.fix}`));
+    if (check.passed) {
+      console.log(chalk.green(`✓ ${check.name}`));
+      if (check.message) {
+        console.log(chalk.gray(`  ${check.message}`));
+      }
+    } else if (check.fix) {
+      console.log(chalk.red(`✗ ${check.name}`));
+      console.log(chalk.gray(`  Fix: ${check.fix}`));
       allPassed = false;
+    } else {
+      console.log(chalk.yellow(`! ${check.name}`));
+      if (check.message) {
+        console.log(chalk.gray(`  ${check.message}`));
+      }
+      hasWarnings = true;
     }
   }
 
   console.log('');
-  if (allPassed) {
-    console.log(chalk.green('All checks passed!'));
-    console.log(chalk.gray('\nFor Unity MCP setup, run: game-ai install-mcp'));
+
+  if (allPassed && !hasWarnings) {
+    console.log(chalk.green('✓ All checks passed! Ready to build games.\n'));
+    console.log(chalk.gray('Run "claude" in this directory to start coding.\n'));
+  } else if (allPassed && hasWarnings) {
+    console.log(chalk.yellow('Setup looks good with minor warnings.\n'));
+    console.log(chalk.gray('Run "claude" in this directory to start coding.\n'));
   } else {
-    console.log(chalk.yellow('Some issues found. See above for fixes.'));
+    console.log(chalk.yellow('Some issues found. See above for fixes.\n'));
   }
+}
+
+function checkUnityInstalled(): CheckResult {
+  const installs = findUnityInstalls();
+  if (installs.length === 0) {
+    return {
+      name: 'Unity installed',
+      passed: false,
+      fix: 'Install Unity via Unity Hub from https://unity.com/download'
+    };
+  }
+  const versions = installs.map(i => i.version).join(', ');
+  return {
+    name: 'Unity installed',
+    passed: true,
+    message: `Found: ${versions}`
+  };
 }
 
 function checkUnityProject(): CheckResult {
-  const passed = fs.existsSync('Assets') && fs.existsSync('Packages');
+  const isUnityProject = fs.existsSync('Assets') && fs.existsSync('Packages');
   return {
     name: 'Unity project',
-    passed,
-    fix: 'Run this from inside a Unity project, or run: game-ai create my-game'
+    passed: isUnityProject,
+    fix: isUnityProject ? undefined : 'Run from inside a Unity project, or run: gamekit init'
   };
 }
 
-function checkNormcoreConfig(): CheckResult {
-  const settingsPath = 'Assets/Normal/Resources/NormcoreAppSettings.asset';
-  if (!fs.existsSync(settingsPath)) {
-    return { name: 'Normcore configured', passed: false, fix: 'Normcore not found in project' };
+function checkClaudeCommands(): CheckResult {
+  const hasCommands = hasClaudeCommands(process.cwd());
+  return {
+    name: 'Claude commands installed',
+    passed: hasCommands,
+    fix: hasCommands ? undefined : 'Run: gamekit install-commands'
+  };
+}
+
+function checkMcpConfig(): CheckResult {
+  const hasConfig = hasMcpConfig(process.cwd());
+  return {
+    name: 'MCP configured (.mcp.json)',
+    passed: hasConfig,
+    fix: hasConfig ? undefined : 'Run: gamekit configure-mcp'
+  };
+}
+
+function checkMcpRelay(): CheckResult {
+  const relayExists = mcpRelayExists();
+  if (relayExists) {
+    return {
+      name: 'MCP relay installed',
+      passed: true
+    };
   }
-  const content = fs.readFileSync(settingsPath, 'utf-8');
-  // Use [ \t]* instead of \s* to stay on the same line (avoid matching next line)
-  const match = content.match(/_normcoreAppKey:[ \t]*(\S+)/);
-  const hasKey = match !== null && match[1] !== undefined && match[1].length > 0;
   return {
-    name: 'Normcore app key',
-    passed: hasKey,
-    fix: 'Set your app key in the NormcoreAppSettings asset'
-  };
-}
-
-function checkClaudeHelpers(): CheckResult {
-  return {
-    name: 'Claude helpers installed',
-    passed: fs.existsSync('.claude/CLAUDE.md'),
-    fix: 'Run: game-ai install-helpers'
+    name: 'MCP relay installed',
+    passed: false,
+    // No fix - this is a warning since it installs when Unity opens
+    message: 'Opens Unity to install packages (relay installs automatically)'
   };
 }

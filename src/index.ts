@@ -1,37 +1,52 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { createProject } from './commands/create.js';
-import { installMCP } from './commands/install-mcp.js';
-import { installHelpers } from './commands/install-helpers.js';
+import { init } from './commands/init.js';
+import { createUnity } from './commands/create-unity.js';
+import { installCommands } from './commands/install-commands.js';
+import { configureMcp } from './commands/configure-mcp.js';
 import { runDoctor } from './commands/doctor.js';
 
 const program = new Command();
 
 program
-  .name('game-ai')
-  .description('AI-powered Unity game development with Normcore')
+  .name('gamekit')
+  .description('AI-powered Unity game development with Claude')
   .version('0.1.0');
 
+// Main command - interactive wizard
 program
-  .command('create')
-  .description('Create a new Unity project with Normcore')
-  .argument('<name>', 'Project name')
-  .action(createProject);
+  .command('init')
+  .description('Create a new Unity game project (interactive wizard)')
+  .action(init);
 
+// Create Unity project
 program
-  .command('install-mcp')
-  .description('Install and configure Unity MCP server for Claude')
-  .action(installMCP);
+  .command('create-unity [name]')
+  .description('Create a new Unity project with Claude and MCP pre-configured')
+  .action(createUnity);
 
+// Install Claude commands
 program
-  .command('install-helpers')
-  .description('Install Claude Code helpers (.claude directory)')
-  .action(installHelpers);
+  .command('install-commands')
+  .description('Install Claude commands, skills, and agents to current directory')
+  .action(installCommands);
 
+// Configure MCP
+program
+  .command('configure-mcp')
+  .description('Generate .mcp.json for Claude Code to connect to Unity')
+  .action(configureMcp);
+
+// Doctor - diagnose issues
 program
   .command('doctor')
-  .description('Diagnose setup issues')
+  .description('Diagnose setup issues and check configuration')
   .action(runDoctor);
+
+// Default to init if no command specified
+program.action(() => {
+  init();
+});
 
 program.parse();
