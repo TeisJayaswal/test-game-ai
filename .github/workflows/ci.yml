@@ -23,7 +23,7 @@ jobs:
         run: bun install
 
       - name: Run tests
-        run: bun test
+        run: bun test src/__tests__
 
       - name: Type check
         run: bunx tsc --noEmit
