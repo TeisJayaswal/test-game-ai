@@ -1,5 +1,0 @@
-{
-  "name": "matchmaking",
-  "description": "Implement multiplayer matchmaking with Normcore",
-  "prompt": "I need to implement a matchmaking system for my game. Please:\n\n1. Create a MatchmakingManager script that uses Normcore's Quickmatch API\n2. Set up UI for the matchmaking flow\n3. Add the MatchmakingManager to the appropriate scene\n4. Explain how players will connect to each other\n\nUse Normcore's best practices for room management and connection handling."
-}

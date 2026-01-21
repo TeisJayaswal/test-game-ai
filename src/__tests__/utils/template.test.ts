@@ -67,7 +67,8 @@ describe('template utils', () => {
       expect(fs.existsSync(manifestPath)).toBe(true);
 
       const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-      expect(manifest.dependencies).toHaveProperty('com.codemaestroai.advancedunitymcp');
+      // Use 'in' operator for broader compatibility with test runners
+      expect('com.codemaestroai.advancedunitymcp' in manifest.dependencies).toBe(true);
     });
 
     it('should copy commands folder', () => {

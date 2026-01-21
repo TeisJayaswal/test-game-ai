@@ -1,5 +1,0 @@
-{
-  "name": "build",
-  "description": "Create a build for testing",
-  "prompt": "Create a build of this game for testing. Please:\n\n1. Ask what platform to build for (Windows, macOS, Linux, Android/Quest)\n2. Set up build settings appropriately\n3. Use Unity MCP to trigger the build\n4. Report build location and any warnings/errors\n5. If VR, remind about device setup requirements\n\nUse Unity's BuildPipeline API via MCP tools."
-}

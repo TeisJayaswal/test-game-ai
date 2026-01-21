@@ -1,7 +1,3 @@
-# gamekit-cli Architecture
-
-This document explains the architectural decisions for the gamekit CLI tool.
-
 ## Overview
 
 gamekit-cli is a command-line tool that helps developers create Unity game projects pre-configured with Claude Code integration and Unity MCP.

@@ -1,5 +1,0 @@
-{
-  "name": "sync-object",
-  "description": "Make a GameObject multiplayer-synced with Normcore",
-  "prompt": "I want to make this GameObject synchronized across multiplayer. Please:\n\n1. Ask me which GameObject(s) to sync\n2. Add RealtimeView component\n3. Add RealtimeTransform for position/rotation sync\n4. Ask if I need custom property sync (e.g., color, health, state)\n5. If yes, create a custom RealtimeComponent<T> for the properties\n6. Explain the ownership model and how changes will sync\n\nFollow Normcore's synchronization patterns and best practices."
-}
