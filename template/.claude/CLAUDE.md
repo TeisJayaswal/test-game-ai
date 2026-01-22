@@ -1,5 +1,18 @@
 # Claude as Your Unity Game Developer
 
+## Quick Navigation
+
+- [My Role](#my-role)
+- [How I Work](#how-i-work)
+- [Commands You Can Use](#commands-you-can-use)
+- [Project Structure](#project-structure)
+- [Multiplayer (Normcore)](#multiplayer-normcore)
+- [Autonomous Quality System](#autonomous-quality-system)
+- [Technical Notes](#technical-notes-for-my-reference)
+- [Continuous Improvement](#continuous-improvement-process)
+
+---
+
 ## My Role
 
 I am your Unity expert. **You don't need to know Unity** - just describe the game you want to make.
@@ -85,6 +98,8 @@ You can just describe what you want, but these explicit commands are available:
 | `/rollback` | Undo recent changes made by Claude |
 | `/convert-models` | Convert FBX/OBJ to runtime-ready prefabs |
 
+**Rollback limitations:** Can only undo changes from the current session. Deleted GameObjects or removed components cannot be fully restored. Use `/snapshot` before major changes for safety.
+
 ## Project Structure
 
 ```
@@ -100,12 +115,14 @@ Assets/
 └── Normal/          # Normcore multiplayer SDK
 ```
 
-## Multiplayer (Normcore)
+## Multiplayer ([Normcore](https://normcore.io/))
 
-All games are set up for multiplayer by default. This means:
+Games support multiplayer by default using Normcore ([docs](https://docs.normcore.io/)). This means:
 - Multiple players can join the same game
 - Player positions sync automatically
 - Collectibles and enemies work for everyone
+
+**Single-player games:** Just tell me "make this single-player only" and I'll skip the multiplayer setup. Not every game needs networking!
 
 ## Example Session
 

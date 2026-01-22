@@ -4,6 +4,8 @@ description: Setting up Normcore multiplayer synchronization
 
 # Multiplayer Setup (Normcore)
 
+**AUTOMATIC BEHAVIOR** - Claude applies this by default for new games unless told "single-player only".
+
 Use this skill for ANY game - we assume multiplayer by default using Normcore.
 
 ## Always Apply

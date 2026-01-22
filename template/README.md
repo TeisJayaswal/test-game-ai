@@ -1,4 +1,4 @@
-# Unity Vibe Coding Template
+# Unity [GameKit](https://github.com/gamekit-agent/gamekit-cli) Template
 
 This template sets up Claude Code as your Unity game development expert.
 
@@ -24,7 +24,7 @@ This template sets up Claude Code as your Unity game development expert.
    - Follow instructions at: https://github.com/anthropics/unity-mcp
    - This connects Claude to Unity Editor
 
-3. **Install Normcore (Optional)**
+3. **Install [Normcore](https://normcore.io/) (Optional)**
    - For multiplayer support
    - Package Manager → Add by name: `com.normalvr.normcore`
 
@@ -115,3 +115,5 @@ Just describe the game you want. Claude handles all Unity implementation AND ver
 - `code-debugger` - Finds and fixes bugs
 - `optimizer` - Improves performance
 - `iterator` - Orchestrates quality iteration (NEW)
+
+Created by [gamekit-cli](https://github.com/gamekit-agent/gamekit-cli)
