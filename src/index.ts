@@ -1,13 +1,27 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import chalk from 'chalk';
 import { init } from './commands/init.js';
 import { createUnity } from './commands/create-unity.js';
 import { installCommands } from './commands/install-commands.js';
 import { configureMcp } from './commands/configure-mcp.js';
 import { waitForMcp } from './commands/wait-for-mcp.js';
+import { updateCommands } from './commands/update-commands.js';
 import { runDoctor } from './commands/doctor.js';
-import { maybeCheckForUpdates, getCurrentVersion } from './utils/updater.js';
+import { maybeCheckForUpdates, getCurrentVersion, checkForAppliedUpdate } from './utils/updater.js';
+import { areCommandsOutdated } from './utils/template.js';
+
+// Check if an update was applied in the background
+const updatedVersion = checkForAppliedUpdate();
+if (updatedVersion) {
+  console.log(chalk.green(`✓ Updated to gamekit v${updatedVersion}\n`));
+}
+
+// Check if commands are outdated in current directory
+if (areCommandsOutdated(process.cwd())) {
+  console.log(chalk.yellow(`⚡ New commands available! Run \`gamekit update-commands\` to update.\n`));
+}
 
 // Check for updates in background (non-blocking)
 maybeCheckForUpdates();
@@ -48,6 +62,12 @@ program
   .command('wait-for-mcp')
   .description('Wait for Unity to install the MCP package')
   .action(waitForMcp);
+
+// Update commands
+program
+  .command('update-commands')
+  .description('Update Claude commands, skills, and agents to latest version')
+  .action(updateCommands);
 
 // Doctor - diagnose issues
 program

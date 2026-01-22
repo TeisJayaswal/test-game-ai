@@ -276,6 +276,10 @@ export function checkForUpdatesInBackground(): void {
 
           fs.renameSync(tempPath, targetPath);
           log('Updated to version ' + latest + ' successfully!');
+
+          // Write marker file so next run can notify user
+          const updateAppliedPath = path.join(configDir, 'update-applied');
+          fs.writeFileSync(updateAppliedPath, latest);
         } else {
           log('Already up to date.');
         }
@@ -327,6 +331,28 @@ export function shouldCheckForUpdates(): boolean {
   }
 
   return true;
+}
+
+/**
+ * Check if an update was applied and return the new version
+ * Returns null if no update was applied
+ */
+export function checkForAppliedUpdate(): string | null {
+  const configDir = getConfigDir();
+  const updateAppliedPath = path.join(configDir, 'update-applied');
+
+  try {
+    if (fs.existsSync(updateAppliedPath)) {
+      const newVersion = fs.readFileSync(updateAppliedPath, 'utf-8').trim();
+      // Delete the file so we only show the message once
+      fs.unlinkSync(updateAppliedPath);
+      return newVersion;
+    }
+  } catch {
+    // Ignore errors
+  }
+
+  return null;
 }
 
 /**

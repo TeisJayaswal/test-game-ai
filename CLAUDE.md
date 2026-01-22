@@ -6,6 +6,15 @@ A command-line tool that makes Unity game development accessible to beginners us
 
 **STRICT TDD** - Write tests FIRST, then implementation. Never write code without a failing test.
 
+### Testing Priority
+
+Testing is a top priority for this project:
+- Always write tests for new functionality before implementing
+- Run `npm test` before committing to ensure all tests pass
+- When adding new utility functions, add corresponding tests in `src/__tests__/`
+- Tests should cover both happy paths and edge cases
+- If you find untested code, add tests before modifying it
+
 ## Commands
 
 ```bash
@@ -74,4 +83,21 @@ When creating a new release:
 1. Update `version` in package.json BEFORE creating the tag (so the version shows correctly in the built binary)
 2. Commit the version bump
 3. Create and push the git tag (e.g., `git tag v0.1.9 && git push origin v0.1.9`)
+
+## Auto-Update System
+
+The CLI has a built-in auto-update system:
+
+**Binary updates:**
+- Checks GitHub releases once per hour (in background, non-blocking)
+- Downloads and replaces binary automatically
+- Shows `✓ Updated to gamekit vX.X.X` on next run
+- Disable with `GAMEKIT_NO_UPDATE_CHECK=1` env var
+- Logs activity to `~/.gamekit/update.log`
+
+**Commands/skills updates:**
+- The `.claude` folder is versioned separately (`.claude/.version` file)
+- Shows `⚡ New commands available!` when CLI is newer than installed commands
+- Users run `gamekit update-commands` to update
+- Warning: This overwrites the entire `.claude` folder (user changes will be lost)
 
