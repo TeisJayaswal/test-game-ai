@@ -156,9 +156,7 @@ async function initExistingProject(projectPath: string): Promise<void> {
     console.log(chalk.blue('Next steps:\n'));
     console.log(chalk.white(`  1. ${chalk.cyan('Restart Unity')}`));
     console.log(chalk.gray('     To load the new MCP package\n'));
-    console.log(chalk.white(`  2. ${chalk.cyan('gamekit wait-for-mcp')}`));
-    console.log(chalk.gray('     Wait for MCP to be ready (optional)\n'));
-    console.log(chalk.white(`  3. ${chalk.cyan('claude')}`));
+    console.log(chalk.white(`  2. ${chalk.cyan('claude')}`));
     console.log(chalk.gray('     Start building with AI!\n'));
   }
 
