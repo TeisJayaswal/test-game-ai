@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-unix:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,13 +27,67 @@ jobs:
       - name: Run tests
         run: bun test src/__tests__
 
-      - name: Build all platforms
+      - name: Build macOS and Linux binaries
         run: |
           mkdir -p dist
-          bun build --compile --target=bun-darwin-arm64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-darwin-arm64
-          bun build --compile --target=bun-darwin-x64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-darwin-x64
-          bun build --compile --target=bun-linux-x64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-linux-x64
-          bun build --compile --target=bun-windows-x64 --minify --bytecode ./src/index.ts --outfile dist/gamekit-windows-x64.exe
+          bun build --compile --target=bun-darwin-arm64 --minify ./src/index.ts --outfile dist/gamekit-darwin-arm64
+          bun build --compile --target=bun-darwin-x64 --minify ./src/index.ts --outfile dist/gamekit-darwin-x64
+          bun build --compile --target=bun-linux-x64 --minify ./src/index.ts --outfile dist/gamekit-linux-x64
+
+      - name: Upload unix artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unix-binaries
+          path: |
+            dist/gamekit-darwin-arm64
+            dist/gamekit-darwin-x64
+            dist/gamekit-linux-x64
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build Windows binary natively
+        run: |
+          mkdir -p dist
+          bun build --compile --target=bun-windows-x64 --minify ./src/index.ts --outfile dist/gamekit-windows-x64.exe
+
+      - name: Upload windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binary
+          path: dist/gamekit-windows-x64.exe
+
+  release:
+    needs: [build-unix, build-windows]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download unix artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: unix-binaries
+          path: dist
+
+      - name: Download windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-binary
+          path: dist
 
       - name: Make install scripts executable
         run: chmod +x install.sh
