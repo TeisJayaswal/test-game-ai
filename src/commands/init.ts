@@ -318,17 +318,19 @@ async function createNewProject(): Promise<void> {
   const cdCmd = `cd ${projectName}`;
 
   if (mcpReady) {
-    console.log(chalk.blue('Ready to go!\n'));
+    console.log(chalk.blue('Next steps:\n'));
     console.log(chalk.white(`  1. ${chalk.cyan(cdCmd)}`));
     console.log(chalk.gray('     Navigate to your project\n'));
-    console.log(chalk.white(`  2. ${chalk.cyan('claude')}`));
+    console.log(chalk.white(`  2. ${chalk.green('✓')} ${chalk.cyan('Wait for Unity to finish loading')}`));
+    console.log(chalk.gray('     Packages installed automatically\n'));
+    console.log(chalk.white(`  3. ${chalk.cyan('claude')}`));
     console.log(chalk.gray('     Start building with AI!\n'));
   } else {
     console.log(chalk.blue('Next steps:\n'));
     console.log(chalk.white(`  1. ${chalk.cyan(cdCmd)}`));
     console.log(chalk.gray('     Navigate to your project\n'));
     console.log(chalk.white(`  2. ${chalk.cyan('Wait for Unity to finish loading')}`));
-    console.log(chalk.gray('     The MCP package is still installing\n'));
+    console.log(chalk.gray('     Packages will install automatically (~1-2 min)\n'));
     console.log(chalk.white(`  3. ${chalk.cyan('claude')}`));
     console.log(chalk.gray('     Start building with AI!\n'));
   }
