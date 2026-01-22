@@ -67,3 +67,11 @@ ProjectName/
 - inquirer: Interactive prompts
 - typescript: Type safety
 - vitest: Testing framework
+
+## Releasing
+
+When creating a new release:
+1. Update `version` in package.json BEFORE creating the tag (so the version shows correctly in the built binary)
+2. Commit the version bump
+3. Create and push the git tag (e.g., `git tag v0.1.9 && git push origin v0.1.9`)
+
