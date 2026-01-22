@@ -5,6 +5,7 @@ import { init } from './commands/init.js';
 import { createUnity } from './commands/create-unity.js';
 import { installCommands } from './commands/install-commands.js';
 import { configureMcp } from './commands/configure-mcp.js';
+import { waitForMcp } from './commands/wait-for-mcp.js';
 import { runDoctor } from './commands/doctor.js';
 import { maybeCheckForUpdates, getCurrentVersion } from './utils/updater.js';
 
@@ -41,6 +42,12 @@ program
   .command('configure-mcp')
   .description('Generate .mcp.json for Claude Code to connect to Unity')
   .action(configureMcp);
+
+// Wait for MCP
+program
+  .command('wait-for-mcp')
+  .description('Wait for Unity to install the MCP package')
+  .action(waitForMcp);
 
 // Doctor - diagnose issues
 program

@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import ora, { Ora } from 'ora';
 import { getPlatform, getHomeDir, getMcpRelayPath, isMac, isWindows } from './platform.js';
 
 /**
@@ -99,4 +100,58 @@ export function mcpRelayExists(
 ): boolean {
   const relayPath = getMcpRelayPath(platform, homeDir, localAppData);
   return fs.existsSync(relayPath);
+}
+
+/**
+ * Wait for the MCP relay to be installed by Unity
+ * Shows a spinner and polls until the relay file exists or timeout is reached
+ *
+ * @param options - Configuration options
+ * @param options.timeoutMs - Maximum time to wait in milliseconds (default: 5 minutes)
+ * @param options.pollIntervalMs - How often to check in milliseconds (default: 2 seconds)
+ * @param options.spinner - Optional existing spinner to use
+ * @returns Promise that resolves to true if relay found, false if timed out
+ */
+export async function waitForMcpRelay(options: {
+  timeoutMs?: number;
+  pollIntervalMs?: number;
+  spinner?: Ora;
+} = {}): Promise<boolean> {
+  const {
+    timeoutMs = 5 * 60 * 1000, // 5 minutes default
+    pollIntervalMs = 2000,     // 2 seconds default
+    spinner: externalSpinner
+  } = options;
+
+  const spinner = externalSpinner || ora('Waiting for Unity to install MCP package...').start();
+  const startTime = Date.now();
+  let dots = 0;
+
+  const updateSpinnerText = () => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const dotStr = '.'.repeat((dots % 3) + 1);
+    spinner.text = `Waiting for Unity to install MCP package${dotStr} (${elapsed}s)`;
+    dots++;
+  };
+
+  return new Promise((resolve) => {
+    const check = () => {
+      if (mcpRelayExists()) {
+        spinner.succeed('MCP relay installed and ready');
+        resolve(true);
+        return;
+      }
+
+      if (Date.now() - startTime >= timeoutMs) {
+        spinner.warn('MCP relay not found yet (Unity may still be loading)');
+        resolve(false);
+        return;
+      }
+
+      updateSpinnerText();
+      setTimeout(check, pollIntervalMs);
+    };
+
+    check();
+  });
 }

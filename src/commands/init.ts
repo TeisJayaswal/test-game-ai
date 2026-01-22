@@ -13,7 +13,7 @@ import {
 } from '../utils/unity.js';
 import { copyTemplateAsync } from '../utils/template.js';
 import { addMcpToManifest } from '../utils/manifest.js';
-import { generateMcpConfig } from '../utils/mcp.js';
+import { generateMcpConfig, waitForMcpRelay, mcpRelayExists } from '../utils/mcp.js';
 import { createEditorScripts } from '../utils/assets.js';
 
 /**
@@ -135,20 +135,32 @@ async function initExistingProject(projectPath: string): Promise<void> {
     process.exit(1);
   }
 
-  // Success!
-  console.log(chalk.green(`
+  // Check if MCP relay already exists (user may have used this before)
+  if (mcpRelayExists()) {
+    console.log(chalk.green(`
 ╔════════════════════════════════════════╗
 ║       ✓ Project Initialized!           ║
 ╚════════════════════════════════════════╝
 `));
-
-  console.log(chalk.blue('Next steps:\n'));
-
-  console.log(chalk.white(`  1. ${chalk.cyan('Restart Unity')}`));
-  console.log(chalk.gray('     To load the new MCP package\n'));
-
-  console.log(chalk.white(`  2. ${chalk.cyan('claude')}`));
-  console.log(chalk.gray('     Start building with AI!\n'));
+    console.log(chalk.blue('Ready to go!\n'));
+    console.log(chalk.white(`  1. ${chalk.cyan('Restart Unity')}`));
+    console.log(chalk.gray('     To load the new MCP package\n'));
+    console.log(chalk.white(`  2. ${chalk.cyan('claude')}`));
+    console.log(chalk.gray('     Start building with AI!\n'));
+  } else {
+    console.log(chalk.green(`
+╔════════════════════════════════════════╗
+║       ✓ Project Initialized!           ║
+╚════════════════════════════════════════╝
+`));
+    console.log(chalk.blue('Next steps:\n'));
+    console.log(chalk.white(`  1. ${chalk.cyan('Restart Unity')}`));
+    console.log(chalk.gray('     To load the new MCP package\n'));
+    console.log(chalk.white(`  2. ${chalk.cyan('gamekit wait-for-mcp')}`));
+    console.log(chalk.gray('     Wait for MCP to be ready (optional)\n'));
+    console.log(chalk.white(`  3. ${chalk.cyan('claude')}`));
+    console.log(chalk.gray('     Start building with AI!\n'));
+  }
 
   console.log(chalk.gray('─'.repeat(44)));
   console.log(chalk.gray('\nTip: Use /new-game to start building!'));
@@ -286,11 +298,15 @@ async function createNewProject(): Promise<void> {
   spinner.start('Opening Unity...');
   try {
     openUnityProject(selectedInstall.path, projectPath);
-    spinner.succeed('Unity is opening (packages will install automatically)');
+    spinner.succeed('Unity is opening');
   } catch (error) {
     spinner.warn('Could not open Unity automatically');
     console.log(chalk.gray('  Please open the project manually in Unity Hub.\n'));
   }
+
+  // Step 8: Wait for MCP relay to be installed
+  console.log(chalk.gray('\n  Unity is installing packages. This usually takes 1-2 minutes.\n'));
+  const mcpReady = await waitForMcpRelay({ timeoutMs: 5 * 60 * 1000 });
 
   // Success!
   console.log(chalk.green(`
@@ -299,17 +315,23 @@ async function createNewProject(): Promise<void> {
 ╚════════════════════════════════════════╝
 `));
 
-  console.log(chalk.blue('Next steps:\n'));
-
   const cdCmd = `cd ${projectName}`;
-  console.log(chalk.white(`  1. ${chalk.cyan(cdCmd)}`));
-  console.log(chalk.gray('     Navigate to your project\n'));
 
-  console.log(chalk.white(`  2. ${chalk.cyan('Wait for Unity to finish loading')}`));
-  console.log(chalk.gray('     Packages will install automatically (~1-2 min)\n'));
-
-  console.log(chalk.white(`  3. ${chalk.cyan('claude')}`));
-  console.log(chalk.gray('     Start building with AI!\n'));
+  if (mcpReady) {
+    console.log(chalk.blue('Ready to go!\n'));
+    console.log(chalk.white(`  1. ${chalk.cyan(cdCmd)}`));
+    console.log(chalk.gray('     Navigate to your project\n'));
+    console.log(chalk.white(`  2. ${chalk.cyan('claude')}`));
+    console.log(chalk.gray('     Start building with AI!\n'));
+  } else {
+    console.log(chalk.blue('Next steps:\n'));
+    console.log(chalk.white(`  1. ${chalk.cyan(cdCmd)}`));
+    console.log(chalk.gray('     Navigate to your project\n'));
+    console.log(chalk.white(`  2. ${chalk.cyan('Wait for Unity to finish loading')}`));
+    console.log(chalk.gray('     The MCP package is still installing\n'));
+    console.log(chalk.white(`  3. ${chalk.cyan('claude')}`));
+    console.log(chalk.gray('     Start building with AI!\n'));
+  }
 
   console.log(chalk.gray('─'.repeat(44)));
   console.log(chalk.gray('\nTip: Use /new-game to start building!'));
