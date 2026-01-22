@@ -94,10 +94,10 @@ else
     echo "  source $PROFILE"
     echo ""
 
-    # Offer to add automatically
-    read -p "Add to PATH automatically? [y/N] " -n 1 -r
+    # Offer to add automatically (default: yes)
+    read -p "Add to PATH automatically? [Y/n] " -n 1 -r
     echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
         echo "export PATH=\"\$PATH:$INSTALL_DIR\"" >> "$PROFILE"
         echo -e "${GREEN}Added to $PROFILE${NC}"
         echo "Run 'source $PROFILE' or restart your terminal to use gamekit"

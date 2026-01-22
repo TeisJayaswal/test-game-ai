@@ -54,15 +54,20 @@ Write-Host "Installed gamekit to $TargetPath" -ForegroundColor Green
 $CurrentPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($CurrentPath -notlike "*$InstallDir*") {
     Write-Host ""
-    Write-Host "Adding gamekit to your PATH..." -ForegroundColor Yellow
+    $response = Read-Host "Add to PATH automatically? [Y/n]"
+    if ($response -ne "n" -and $response -ne "N") {
+        $NewPath = "$CurrentPath;$InstallDir"
+        [Environment]::SetEnvironmentVariable("Path", $NewPath, "User")
 
-    $NewPath = "$CurrentPath;$InstallDir"
-    [Environment]::SetEnvironmentVariable("Path", $NewPath, "User")
+        # Update current session
+        $env:Path = "$env:Path;$InstallDir"
 
-    # Update current session
-    $env:Path = "$env:Path;$InstallDir"
-
-    Write-Host "Added to PATH. You may need to restart your terminal." -ForegroundColor Green
+        Write-Host "Added to PATH. You may need to restart your terminal." -ForegroundColor Green
+    } else {
+        Write-Host ""
+        Write-Host "To add gamekit to your PATH manually, run:" -ForegroundColor Yellow
+        Write-Host "  [Environment]::SetEnvironmentVariable('Path', `$env:Path + ';$InstallDir', 'User')"
+    }
 } else {
     Write-Host "$InstallDir is already in your PATH" -ForegroundColor Green
 }
