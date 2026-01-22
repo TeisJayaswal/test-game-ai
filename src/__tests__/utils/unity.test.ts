@@ -8,6 +8,7 @@ import {
   isUnity6OrNewer,
   getUnityExecutablePath,
   getMcpPackageUrl,
+  isUnityProject,
   UnityInstall
 } from '../../utils/unity.js';
 
@@ -115,6 +116,75 @@ describe('unity utilities', () => {
     it('returns Unity2020_2022 path for Unity 2021.x', () => {
       const url = getMcpPackageUrl('2021.3.0f1');
       expect(url).toBe('https://github.com/codemaestroai/advanced-unity-mcp.git?path=Unity2020_2022');
+    });
+
+    it('returns Unity2020_2022 path for Unity 2020.x', () => {
+      const url = getMcpPackageUrl('2020.3.0f1');
+      expect(url).toBe('https://github.com/codemaestroai/advanced-unity-mcp.git?path=Unity2020_2022');
+    });
+
+    it('returns null for Unity 2019.x (unsupported)', () => {
+      const url = getMcpPackageUrl('2019.4.0f1');
+      expect(url).toBeNull();
+    });
+
+    it('returns null for Unity 2018.x (unsupported)', () => {
+      const url = getMcpPackageUrl('2018.4.0f1');
+      expect(url).toBeNull();
+    });
+
+    it('returns null for invalid version', () => {
+      const url = getMcpPackageUrl('invalid');
+      expect(url).toBeNull();
+    });
+  });
+
+  describe('isUnityProject', () => {
+    let testDir: string;
+
+    beforeEach(() => {
+      testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'unity-project-test-'));
+    });
+
+    afterEach(() => {
+      fs.rmSync(testDir, { recursive: true, force: true });
+    });
+
+    it('returns true for valid Unity project structure', () => {
+      // Create minimal Unity project structure
+      fs.mkdirSync(path.join(testDir, 'Assets'));
+      fs.mkdirSync(path.join(testDir, 'Packages'), { recursive: true });
+      fs.writeFileSync(
+        path.join(testDir, 'Packages', 'manifest.json'),
+        JSON.stringify({ dependencies: {} })
+      );
+
+      expect(isUnityProject(testDir)).toBe(true);
+    });
+
+    it('returns false when Assets folder is missing', () => {
+      fs.mkdirSync(path.join(testDir, 'Packages'), { recursive: true });
+      fs.writeFileSync(
+        path.join(testDir, 'Packages', 'manifest.json'),
+        JSON.stringify({ dependencies: {} })
+      );
+
+      expect(isUnityProject(testDir)).toBe(false);
+    });
+
+    it('returns false when manifest.json is missing', () => {
+      fs.mkdirSync(path.join(testDir, 'Assets'));
+      fs.mkdirSync(path.join(testDir, 'Packages'));
+
+      expect(isUnityProject(testDir)).toBe(false);
+    });
+
+    it('returns false for empty directory', () => {
+      expect(isUnityProject(testDir)).toBe(false);
+    });
+
+    it('returns false for non-existent directory', () => {
+      expect(isUnityProject('/non/existent/path')).toBe(false);
     });
   });
 });
