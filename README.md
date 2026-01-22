@@ -30,33 +30,6 @@ The installer will:
 - Install to `~/.gamekit/bin` (Mac/Linux) or `%LOCALAPPDATA%\gamekit\bin` (Windows)
 - Add gamekit to your PATH
 
-## Updates
-
-### Auto-updates
-
-gamekit automatically updates in the background. When a new version is installed, you'll see:
-
-```
-✓ Updated to gamekit v0.2.0
-```
-
-To disable auto-updates, set `GAMEKIT_NO_UPDATE_CHECK=1`.
-
-### Updating commands
-
-When new Claude commands are available, you'll see:
-
-```
-⚡ New commands available! Run `gamekit update-commands` to update.
-```
-
-Run `gamekit update-commands` to get the latest commands, skills, and agents.
-
-**Smart merging:** gamekit tracks which files you've modified. When updating:
-- New files are added automatically
-- Unchanged files are updated automatically
-- Modified files prompt you to choose: keep yours or get the latest
-
 ## Quick Start
 
 ```bash
@@ -97,29 +70,6 @@ gamekit init
 
 **Outside a Unity project:** Creates a new Unity project with everything pre-configured.
 
-### `gamekit install-commands`
-
-Install Claude commands to an existing Unity project.
-
-```bash
-cd my-existing-project
-gamekit install-commands
-```
-
-Installs:
-- 14 slash commands (`/playtest`, `/build`, `/find-asset`, etc.)
-- 18 skills (adding enemies, UI, physics, etc.)
-- 6 agents (game-planner, asset-finder, code-debugger, etc.)
-
-### `gamekit configure-mcp`
-
-Generate `.mcp.json` for Claude Code to connect to Unity.
-
-```bash
-cd my-project
-gamekit configure-mcp
-```
-
 ### `gamekit doctor`
 
 Diagnose setup issues.
@@ -134,17 +84,6 @@ Checks:
 - Claude commands installed
 - MCP configured
 - MCP relay available
-
-### `gamekit update-commands`
-
-Update Claude commands, skills, and agents to the latest version.
-
-```bash
-cd my-project
-gamekit update-commands
-```
-
-Uses smart merging - files you've customized won't be overwritten without asking.
 
 ## How It Works
 
