@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { init } from './commands/init.js';
-import { createUnity } from './commands/create-unity.js';
 import { installCommands } from './commands/install-commands.js';
 import { configureMcp } from './commands/configure-mcp.js';
 import { waitForMcp } from './commands/wait-for-mcp.js';
@@ -38,12 +37,6 @@ program
   .command('init')
   .description('Create a new Unity game project (interactive wizard)')
   .action(init);
-
-// Create Unity project
-program
-  .command('create-unity [name]')
-  .description('Create a new Unity project with Claude and MCP pre-configured')
-  .action(createUnity);
 
 // Install Claude commands
 program

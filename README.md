@@ -87,26 +87,15 @@ Claude will plan and build it.
 
 ### `gamekit init`
 
-Interactive wizard that creates a complete game project.
+Interactive wizard that sets up your game project.
 
 ```bash
 gamekit init
 ```
 
-This will:
-- Find your Unity installations
-- Create a new Unity project
-- Install Claude commands, skills, and agents
-- Configure MCP for Claude ↔ Unity communication
-- Open Unity automatically
+**In a Unity project:** Adds Claude commands, skills, agents, and MCP configuration.
 
-### `gamekit create-unity [name]`
-
-Create a Unity project (same as init, but can pass name directly).
-
-```bash
-gamekit create-unity my-shooter
-```
+**Outside a Unity project:** Creates a new Unity project with everything pre-configured.
 
 ### `gamekit install-commands`
 
