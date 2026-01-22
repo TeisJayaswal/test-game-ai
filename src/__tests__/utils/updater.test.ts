@@ -8,6 +8,7 @@ import {
 } from '../../utils/updater.js';
 import * as os from 'os';
 import * as path from 'path';
+import { VERSION } from '../../version.js';
 
 describe('updater utilities', () => {
   describe('compareVersions', () => {
@@ -40,9 +41,9 @@ describe('updater utilities', () => {
       expect(version).toMatch(/^\d+\.\d+\.\d+$/);
     });
 
-    it('returns the embedded version', () => {
+    it('returns the injected version', () => {
       const version = getCurrentVersion();
-      expect(version).toBe('0.1.0');
+      expect(version).toBe(VERSION);
     });
   });
 

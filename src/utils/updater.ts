@@ -11,8 +11,8 @@ const __dirname = path.dirname(__filename);
 // GitHub repo for releases
 const GITHUB_REPO = 'TeisJayaswal/test-game-ai';
 
-// Embedded version (set at build time or from package.json)
-const VERSION = '0.1.0';
+// Version injected at build time (see scripts/inject-version.ts)
+import { VERSION } from '../version.js';
 
 /**
  * Get the path to the gamekit config directory (~/.gamekit)

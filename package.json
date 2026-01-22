@@ -1,6 +1,6 @@
 {
   "name": "gamekit-cli",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "AI-powered Unity game development with Claude",
   "type": "module",
   "main": "dist/index.js",
@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:binary": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:windows-x64",
+    "version:inject": "bun scripts/inject-version.ts",
+    "build:binary": "bun run version:inject && bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:windows-x64",
     "build:darwin-arm64": "bun build --compile --target=bun-darwin-arm64 --minify ./src/index.ts --outfile dist/gamekit-darwin-arm64",
     "build:darwin-x64": "bun build --compile --target=bun-darwin-x64 --minify ./src/index.ts --outfile dist/gamekit-darwin-x64",
     "build:linux-x64": "bun build --compile --target=bun-linux-x64 --minify ./src/index.ts --outfile dist/gamekit-linux-x64",
