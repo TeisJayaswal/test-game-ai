@@ -137,8 +137,12 @@ export async function waitForMcpRelay(options: {
   return new Promise((resolve) => {
     const check = () => {
       if (mcpRelayExists()) {
-        spinner.succeed('MCP relay installed and ready');
-        resolve(true);
+        // Add 5 second buffer to ensure MCP server is fully ready
+        spinner.text = 'MCP relay found, waiting for server to initialize...';
+        setTimeout(() => {
+          spinner.succeed('MCP relay installed and ready');
+          resolve(true);
+        }, 5000);
         return;
       }
 
